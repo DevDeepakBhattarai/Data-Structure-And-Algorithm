@@ -3,7 +3,7 @@
 #include <string.h>
 
 struct Array {
-    int* array;
+    void* array;
     int size, used;
 };
 
@@ -25,9 +25,9 @@ int* copy_to_array(struct Array* arr1, struct Array* arr2) {
 }
 
 
-int append(struct Array* array, int value) {
+int append(struct Array* array, const void* value) {
     if (array->used < array->size) {
-        array->array[array->used] = value;
+        memcpy(array->array, value, sizeof(value));
         array->used++;
     }
 

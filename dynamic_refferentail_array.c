@@ -41,6 +41,7 @@ int* copy_to_array(Array* arr1, Array* arr2) {
     }
 }
 
+
 void initialize_array(void* array, int size, Datatypes type) {
     int effective_size = 0;
     switch (type) {
