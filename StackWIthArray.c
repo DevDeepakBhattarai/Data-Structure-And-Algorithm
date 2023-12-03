@@ -9,7 +9,7 @@ typedef struct Stack {
 }Stack;
 
 Stack* stackCreate(int size) {
-    Stack* stack;
+    Stack* stack = (Stack*)malloc(sizeof(Stack));
     stack->size = size;
     stack->top = -1;
     stack->array = (int*)malloc((size - 1) * sizeof(int));
@@ -61,7 +61,7 @@ int stackPeek(Stack* stack, int position) {
 }
 
 int main() {
-    Stack* stack = stackCreate(5);
+    Stack* stack = stackCreate(10);
     stackPush(stack, 1);
     stackPush(stack, 2);
     stackPush(stack, 3);
