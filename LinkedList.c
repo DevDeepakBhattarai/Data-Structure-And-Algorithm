@@ -51,7 +51,7 @@ void append(LinkedList* list, int value) {
     }
 }
 void linkedListInsert(LinkedList* list, int value, int position) {
-    if (position + 1 < list->length) {
+    if (position > list->length) {
         printf("Cannot Insert %d at position %d\n", value, position);
         return;
     }
@@ -66,14 +66,6 @@ void linkedListInsert(LinkedList* list, int value, int position) {
     } else if (position == 0) {
         node->next = list->head;
         list->head = node;
-    } else if (position + 1 == list->length) {
-        node->next = NULL;
-        Node* current = list->head;
-        for (int i = 0;i < position - 2; i++) {
-            current = current->next;
-        }
-        current->next = node;
-        list->length++;
     } else {
         Node* current = list->head;
         for (int i = 0; i < position - 1; i++) {
@@ -126,8 +118,8 @@ int main() {
     append(list, 6);
     append(list, 7);
     linkedListInsert(list, 8, 4);
-    printf("\nLength is : %d\n", list->length);
-    linkedListDelete(list, 3);
+    // printf("\nLength is : %d\n", list->length);
+    // linkedListDelete(list, 3);
     linkedListPrint(list);
     printf("\nLength is : %d\n", list->length);
     free(list);
