@@ -12,7 +12,7 @@ Stack* stackCreate(int size) {
     Stack* stack = (Stack*)malloc(sizeof(Stack));
     stack->size = size;
     stack->top = -1;
-    stack->array = (int*)malloc((size - 1) * sizeof(int));
+    stack->array = (int*)malloc(size  * sizeof(int));
     return stack;
 }
 
