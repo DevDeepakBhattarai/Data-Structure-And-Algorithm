@@ -68,37 +68,86 @@ void insertInBST(Node* root, int data) {
         }
     }
     insertHelper(root, newNode);
+}
+
+Node* inOrderPredecessorForDeletion(Node* root) {
+    root = root->left;
+    while (root->right != NULL) {
+        root = root->right;
+    }
+    return root;
 
 }
+
+struct Node* inOrderPredecessorForAny(struct Node* root, int key) {
+    struct Node* pred = NULL;
+    while (root != NULL) {
+        if (root->data < key) {
+            pred = root;
+            root = root->right;
+        } else {
+            root = root->left;
+        }
+    }
+    return pred;
+}
+Node* deletionInBST(Node* root, int data) {
+    if (root == NULL) {
+        printf("Data not available to delete\n");
+        return NULL;
+    }
+    if (root->left == NULL && root->right == NULL) {
+        printf("Data deleted  successfully\n");
+        free(root);
+        return NULL;
+    }
+    if (data > root->data) {
+        root->right = deletionInBST(root->right, data);
+    } else if (data < root->data) {
+        root->left = deletionInBST(root->left, data);
+    } else {
+        printf("Data deleted  successfully\n");
+        if (root->left == NULL && root->right != NULL) {
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL && root->left != NULL) {
+            Node* temp = root->left;
+            free(root);
+            return temp;
+        } else {
+            Node* predecessor = inOrderPredecessorForDeletion(root);
+            root->data = predecessor->data;
+            root->left = deletionInBST(root->left, predecessor->data);
+        }
+    }
+    return root;
+}
+
+
+
 int main() {
     Node* root = createNode(7);
 
-    Node* n2 = createNode(6);
-    Node* n3 = createNode(8);
+    root->left = createNode(5);
+    root->right = createNode(19);
 
-    Node* n4 = createNode(2);
-    Node* n5 = createNode(9);
-    Node* n6 = createNode(5);
-    Node* n7 = createNode(18);
 
-    Node* n8 = createNode(19);
-    Node* n9 = createNode(14);
+    root->left->left = createNode(2);
+    root->left->right = createNode(6);
 
-    root->left = n2;
-    root->right = n3;
+    root->right->right = createNode(19);
+    root->right->right->left = createNode(14);
 
-    n2->left = n4;
-
-    n5->left = n6;
-    n5->right = n7;
-
-    n3->right = n8;
-    n8->left = n9;
     printTreeSideways(root, 0, '|');
     insertInBST(root, 21);
-    insertInBST(root, 5);
-    insertInBST(root, 6);
     printTreeSideways(root, 0, '|');
+    deletionInBST(root, 21);
+    printTreeSideways(root, 0, '|');
+    deletionInBST(root, 8);
+    printTreeSideways(root, 0, '|');
+
+
 
 
     return 0;
