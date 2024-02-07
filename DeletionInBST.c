@@ -40,6 +40,7 @@ void printTreeSideways(Node* root, int level, char arrow) {
     printTreeSideways(root->left, level, '\\');
 }
 
+
 void insertInBST(Node* root, int data) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->data = data;

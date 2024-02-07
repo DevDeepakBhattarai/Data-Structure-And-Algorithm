@@ -8,124 +8,133 @@ typedef enum {
     STRING,
     FLOAT,
     DOUBLE,
-} Datatypes;
+    CHAR,
+} Datatype;
+
+typedef struct {
+    Datatype type;
+    union {
+        int integer;
+        float floatingPoint;
+        double longFloatingPoint;
+        char character;
+        char* string;
+    };
+} pointers;
 
 typedef struct Array {
-    void** array;
     int size, used;
-
-    int* integer;
-    float* floatingPoint;
-    double* longFloatingPoint;
-    char* string;
+    pointers* data;
 }Array;
 
 
+
 Array* newArray() {
-    Array* array;
     int size = 5;
-    array->array = malloc(size * sizeof(void*));
+    Array* array = (Array*)(malloc(sizeof(Array)));
+    array->data = (pointers*)(malloc(size * sizeof(pointers)));
     array->size = size;
-    array->integer = NULL;
-    array->floatingPoint = NULL;
-    array->longFloatingPoint = NULL;
-    array->string = NULL;
-    array->used = 0;
+    array->used = -1;
     return array;
 }
 
-int* copy_to_array(Array* arr1, Array* arr2) {
-    for (int i = 0; i < arr1->size; i++) {
-        arr2->array[i] = arr1->array[i];
-        arr2->used = arr1->used;
+
+void append(Array* array, void* value, Datatype type) {
+    int intValue;
+    char charValue;
+    double doubleValue;
+    float floatValue;
+    char* string;
+
+    if (array->used < array->size) {
+        switch (type) {
+            case INT:
+                intValue = *(int*)(value);
+                array->data[array->used + 1].integer = intValue;
+                array->data[array->used + 1].type = type;
+                array->used++;
+                break;
+            case DOUBLE:
+                doubleValue = *(double*)(value);
+                array->data[array->used + 1].longFloatingPoint = doubleValue;
+                array->data[array->used + 1].type = type;
+
+                array->used++;
+                break;
+            case FLOAT:
+                floatValue = *(float*)(value);
+                array->data[array->used + 1].floatingPoint = floatValue;
+                array->data[array->used + 1].type = type;
+                array->used++;
+                break;
+            case CHAR:
+                charValue = *(char*)(value);
+                array->data[array->used + 1].character = charValue;
+                array->data[array->used + 1].type = type;
+                array->used++;
+                break;
+            case STRING:
+                string = (char*)value;
+                array->data[array->used + 1].type = type;
+                array->data[array->used + 1].string = string;
+                array->used++;
+                break;
+            default:
+                break;
+        }
+    } else {
+        array->data = (pointers*)realloc((void*)array->data, (array->used + 8) * sizeof(pointers));
+        array->size = array->used + 8;
+        array->used++;
     }
 }
 
+int len(Array* array) {
+    return array->used + 1;
+}
 
-void initialize_array(void* array, int size, Datatypes type) {
-    int effective_size = 0;
-    switch (type) {
-        {
-        case INT:
-            effective_size = size * sizeof(int);
-            array = (int*)malloc(effective_size);
-            break;
-        case DOUBLE:
-            effective_size = size * sizeof(DOUBLE);
-            array = (double*)malloc(effective_size);
-            break;
-
-        case STRING:
-            effective_size = size * sizeof(char);
-            array = (char*)malloc(effective_size);
-            break;
-        case FLOAT:
-            effective_size = size * sizeof(float);
-            array = (float*)malloc(effective_size);
-            break;
-        default:
-            break;
-            printf("No such datatypes");
+void print(Array* array) {
+    printf("[");
+    for (int i = 0; i <= array->used; i++) {
+        switch (array->data[i].type) {
+            case INT:
+                printf("%d", array->data[i].integer);
+                break;
+            case DOUBLE:
+                printf("%lf", array->data[i].longFloatingPoint);
+                break;
+            case FLOAT:
+                printf("%f", array->data[i].floatingPoint);
+                break;
+            case CHAR:
+                printf("'%c'", array->data[i].character);
+                break;
+            case STRING:
+                printf("\"%s\"", array->data[i].string);
+                break;
+            default:
+                break;
+        }
+        if (i + 1 <= array->used) {
+            printf(", ");
         }
     }
+    printf(" ]\n");
+}
 
-    void append(Array * array, void* value, Datatypes type) {
-        if (array->used < array->size) {
-            switch (type) {
-                case INT:
-                    initialize_array(array->integer, 4, INT);
-                    break;
-                case DOUBLE:
-                    initialize_array(array->longFloatingPoint, 4, DOUBLE);
-                    break;
-                case FLOAT:
-                    initialize_array(array->floatingPoint, 4, FLOAT);
-                    break;
-                case STRING:
-                    initialize_array(array->string, 4, STRING);
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-        if (array->used < array->size) {
-            array->integer[array->used] = value;
-            array->array[array->used] = &array->integer[array->used];
-            array->used++;
-        }
-
-        else {
-            array->array = realloc(array->array, (array->used + 8) * sizeof(int));
-            array->integer = (int*)realloc(array->integer, (array->used + 8) * sizeof(int));
-            array->integer[array->used] = value;
-            array->array[array->used] = &array->integer[array->used];
-            array->size = array->used + 8;
-            array->used++;
-        }
-    }
-
-    int len(Array * array) {
-        return array->used;
-    }
-
-
-    int main() {
-        Array* array = newArray();
-        printf("%d", sizeof(array));
-        // append(array, "Hello");
-        int a = 3;
-        append(array, &a, INT);
-        // append(array, 4);
-        // append(array, 5);
-        // append(array, 6);
-        printf("%d\n", len(array));
-        printf("%d\n", array->size);
-        printf("%d\n", *(int*)array->array[0]);
-        printf("%d", sizeof(array));
-
-        // printf("%d\n", array->array[1]);
-        // printf("%d\n", array->array[5]);
-        return 0;
-    }
+int main() {
+    Array* array = newArray();
+    int a = 5;
+    char string[] = "Hello";
+    char string2[] = "Deepak";
+    double  dbl = 3.14159;
+    char choice = 'Y';
+    append(array, &string, STRING);
+    append(array, &a, INT);
+    append(array, &string2, STRING);
+    append(array, &dbl, DOUBLE);
+    append(array, &choice, CHAR);
+    print(array);
+    printf("Length: %d", len(array));
+    return 0;
+}
