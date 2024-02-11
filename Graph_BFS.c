@@ -7,6 +7,11 @@ typedef struct Node {
     struct Node* next;
 }Node;
 
+typedef struct Graph {
+    int numVertices;
+    Node** adjacencyLists;
+} Graph;
+
 typedef struct Queue {
     Node* front;
     Node* back;
@@ -20,21 +25,31 @@ Queue* queueCreate() {
     queue->size = 0;
     return queue;
 }
-
-void queuePrint(Queue* queue) {
-    Node* current = queue->front;
-    if (current == NULL) {
-        printf("The List is empty\n");
-        return;
-    }
-    while (current != NULL) {
-        {
-            printf("%d\t", current->data);
-            current = current->next;
-        }
-    }
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
 }
 
+Graph* createGraph(int numVertices) {
+    Graph* graph = (Graph*)malloc(sizeof(Graph));
+    graph->numVertices = numVertices;
+    graph->adjacencyLists = (Node**)malloc(numVertices * sizeof(Node*));
+
+    for (int i = 0; i < numVertices; ++i) {
+        graph->adjacencyLists[i] = NULL;
+    }
+
+
+    return graph;
+}
+
+void addEdge(Graph* graph, int src, int dest) {
+    Node* newNode = createNode(dest);
+    newNode->next = graph->adjacencyLists[src];
+    graph->adjacencyLists[src] = newNode;
+}
 void queueEnqueue(Queue* queue, int value) {
     Node* node = (Node*)malloc(sizeof(Node));
     node->data = value;
@@ -71,7 +86,7 @@ int queueDequeue(Queue* queue) {
     return dequeuedElement;
 }
 
-void BFS(int(*graph)[7], int startNode) {
+void BFS(Graph* graph, int startNode) {
     Queue* explorationQueue = queueCreate();
     int node;
     int visited[7] = { 0,0,0,0,0,0,0 };
@@ -81,31 +96,42 @@ void BFS(int(*graph)[7], int startNode) {
 
     while (queueIsEmpty(explorationQueue) == 0) {
         node = queueDequeue(explorationQueue);
-        for (int j = 0; j < 7; j++) {
-            if (graph[node][j] == 1 && visited[j] == 0) {
-                printf("%d ", j);
-                visited[j] = 1;
-                queueEnqueue(explorationQueue, j);
+        Node* adjacencyList = graph->adjacencyLists[node];
+        while (adjacencyList != NULL) {
+            if (visited[adjacencyList->data] == 0) {
+                printf("%d ", adjacencyList->data);
+                visited[adjacencyList->data] = 1;
+                queueEnqueue(explorationQueue, adjacencyList->data);
             }
+            adjacencyList = adjacencyList->next;
         }
+
     }
 }
 
 int main() {
-    int graph[7][7] = {
-        {0,1,1,1,0,0,0},
-        {1,0,1,0,0,0,0},
-        {1,0,1,0,1,0,0},
-        {0,0,1,1,0,1,1},
-        {0,0,0,0,1,0,0},
-        {0,0,0,0,0,0,1},
-        {0,0,0,0,1,0,0}
-    };
+    Graph* graph = createGraph(100);
+    // Node* node = createNode(0);
+    // graph->adjacencyLists[0] = node;
+    addEdge(graph, 0, 1);
+    addEdge(graph, 0, 2);
+    addEdge(graph, 0, 3);
+    addEdge(graph, 1, 2);
+    addEdge(graph, 1, 0);
+    addEdge(graph, 2, 1);
+    addEdge(graph, 2, 3);
+    addEdge(graph, 2, 0);
+    addEdge(graph, 3, 2);
+    addEdge(graph, 3, 0);
+    addEdge(graph, 3, 4);
+    addEdge(graph, 4, 3);
+    addEdge(graph, 4, 2);
+    addEdge(graph, 4, 5);
+    addEdge(graph, 4, 6);
+    addEdge(graph, 5, 4);
+    addEdge(graph, 6, 4);
 
-    Queue* queue = queueCreate();
-
-
-    BFS(graph, 0);
+    BFS(graph, 5);
 
     return 0;
 }
