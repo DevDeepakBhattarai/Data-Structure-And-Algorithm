@@ -4,7 +4,6 @@
 typedef struct Graph {
     int numVertices;
     int** adjacencyMatrix;
-    // Size keep tracks of the number of vertices
     int size;
     // Max node keeps track of the  maximum node/vertex which is used while printing the graph adjacency Matrix
     int maxNode;
@@ -19,11 +18,12 @@ typedef struct Index {
 Graph* createGraph(int numVertices) {
     Graph* graph = (Graph*)malloc(sizeof(Graph));
     graph->numVertices = numVertices;
+    graph->size = 0;
     graph->adjacencyMatrix = (int**)malloc(numVertices * sizeof(int*));
     for (int i = 0; i < numVertices; i++) {
         graph->adjacencyMatrix[i] = (int*)calloc(numVertices, sizeof(int));
     }
-    graph->size = 0;
+    graph->maxNode = 0;
     graph->maxNode = -1;
     return graph;
 }
@@ -81,17 +81,51 @@ void addEdge(Graph* graph, int src, int dest, int weight) {
 
 
 Graph* PrimsAlgorithm(Graph* graph) {
-    Index smallestConnection = findSmallestWeightedConnection(graph->adjacencyMatrix, graph->maxNode);
-    Graph* minimumSpanningTree = createGraph(graph->maxNode);
-    addEdge(minimumSpanningTree, smallestConnection.i, smallestConnection.j, smallestConnection.weight);
+    Graph* minimumSpanningTree = createGraph(graph->maxNode + 1);
     int* included = (int*)calloc(graph->size + 1, sizeof(int));
+    Index smallestConnectionInTheGraph = findSmallestWeightedConnection(graph->adjacencyMatrix, graph->maxNode);
+    addEdge(minimumSpanningTree, smallestConnectionInTheGraph.i, smallestConnectionInTheGraph.j, smallestConnectionInTheGraph.weight);
+    included[smallestConnectionInTheGraph.i] = 1;
+    included[smallestConnectionInTheGraph.j] = 1;
+    int totalVerticesInMST = 2;
+
+    while (totalVerticesInMST < graph->size) {
+        Index smallestEdge;
+        smallestEdge.weight = INT_MAX;
+        for (int i = 0;i <= graph->size; i++) {
+            if (included[i] == 1) {
+                for (int j = 0; j <= graph->size; j++) {
+                    if (graph->adjacencyMatrix[i][j] != 0 && graph->adjacencyMatrix[i][j] < smallestEdge.weight
+                    && included[j] == 0) {
+                        smallestEdge.weight = graph->adjacencyMatrix[i][j];
+                        smallestEdge.i = i;
+                        smallestEdge.j = j;
+                    }
+                }
+            }
+        }
+        addEdge(minimumSpanningTree, smallestEdge.i, smallestEdge.j, smallestEdge.weight);
+        included[smallestEdge.j] = 1;
+        totalVerticesInMST++;
+    }
+    return minimumSpanningTree;
 }
 
+int minimumCost(Graph* MST) {
+    int sum = 0;
+    for (int i = 0; i <= MST->maxNode;i++) {
+        for (int j = i; j <= MST->maxNode;j++) {
+            sum += MST->adjacencyMatrix[i][j];
+        }
+    }
+    return sum;
+}
 int main() {
     Graph* graph = createGraph(100);
-    addEdge(graph, 1, 6, 10);
     addEdge(graph, 1, 2, 28);
+    addEdge(graph, 1, 6, 10);
     addEdge(graph, 2, 3, 16);
+    addEdge(graph, 2, 7, 14);
     addEdge(graph, 6, 5, 25);
     addEdge(graph, 5, 4, 22);
     addEdge(graph, 4, 3, 12);
@@ -99,7 +133,11 @@ int main() {
     addEdge(graph, 5, 7, 24);
 
     printGraph(graph);
-    printf("%d ", findSmallestWeightedConnection(graph->adjacencyMatrix, graph->maxNode).weight);
+    printf("\n\n");
+
+    Graph* tree = PrimsAlgorithm(graph);
+    printGraph(tree);
+    printf("\n%d ", minimumCost(tree));
     return 0;
 }
 

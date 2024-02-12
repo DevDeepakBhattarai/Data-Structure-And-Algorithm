@@ -1,1 +1,1 @@
-    free(node);
+&& included[i] == 0
